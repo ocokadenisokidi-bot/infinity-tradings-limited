@@ -3,6 +3,111 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./supabase-config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+async function loadStudentCourses() {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { data: profile } = await supabase
+    .from("student_profiles")
+    .select("approval_status")
+    .eq("user_id", user.id)
+    .single();
+
+  if (profile?.approval_status !== "approved") return;
+
+  let dashboard = document.querySelector("#student-courses");
+
+  if (!dashboard) {
+    dashboard = document.createElement("section");
+    dashboard.id = "student-courses";
+    dashboard.innerHTML = `
+      <h2>My Learning Centre</h2>
+      <p>Access your courses and track your learning progress.</p>
+      <div id="course-list">Loading courses...</div>
+    `;
+
+    document.querySelector("main").appendChild(dashboard);
+  }
+
+  const { data: courses, error } = await supabase
+    .from("courses")
+    .select("id, title, description, level")
+    .eq("published", true);
+
+  const list = document.querySelector("#course-list");
+  list.replaceChildren();
+
+  if (error || !courses?.length) {
+    list.textContent = "No published courses available yet.";
+    return;
+  }
+
+  for (const course of courses) {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    heading.textContent = course.title;
+
+    const description = document.createElement("p");
+    description.textContent = course.description || "";
+
+    const lessons = document.createElement("div");
+
+    const { data: lessonData } = await supabase
+      .from("lessons")
+      .select("id, title, description, video_url, resource_url")
+      .eq("course_id", course.id)
+      .order("lesson_order");
+
+    for (const lesson of lessonData || []) {
+      const item = document.createElement("div");
+      const title = document.createElement("h4");
+      title.textContent = lesson.title;
+
+      const details = document.createElement("p");
+      details.textContent = lesson.description || "";
+
+      const complete = document.createElement("button");
+      complete.textContent = "Mark as completed";
+      complete.addEventListener("click", async () => {
+        await saveLessonProgress(lesson.id, true);
+        await loadStudentCourses();
+      });
+
+      item.append(title, details);
+
+      if (lesson.video_url) {
+        const video = document.createElement("a");
+        video.href = lesson.video_url;
+        video.textContent = "Watch lesson";
+        video.target = "_blank";
+        video.rel = "noopener noreferrer";
+        item.append(video);
+      }
+
+      if (lesson.resource_url) {
+        const resource = document.createElement("a");
+        resource.href = lesson.resource_url;
+        resource.textContent = "Download learning material";
+        resource.target = "_blank";
+        resource.rel = "noopener noreferrer";
+        item.append(resource);
+      }
+
+      item.append(complete);
+      lessons.append(item);
+    }
+
+    card.append(heading, description, lessons);
+    list.append(card);
+  }
+}
+
+supabase.auth.onAuthStateChange(() => {
+  loadStudentCourses();
+});
+
+loadStudentCourses();
 
 const form = document.querySelector("#student-auth-form");
 const title = document.querySelector("#auth-title");

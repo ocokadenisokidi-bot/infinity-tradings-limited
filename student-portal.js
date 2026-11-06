@@ -163,3 +163,35 @@ supabase.auth.onAuthStateChange(() => {
 
 setMode("login");
 refreshSession();
+async function saveLessonProgress(lessonId, completed) {
+  const { data: { user }, error: userError } =
+    await supabase.auth.getUser();
+
+  if (userError || !user) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("lesson_progress")
+    .upsert(
+      {
+        student_id: user.id,
+        lesson_id: lessonId,
+        completed: completed,
+        updated_at: new Date().toISOString()
+      },
+      {
+        onConflict: "student_id,lesson_id"
+      }
+    );
+
+  if (error) {
+    alert("Progress could not be saved: " + error.message);
+    return;
+  }
+
+  alert("Lesson progress saved successfully!");
+}
+
+window.saveLessonProgress = saveLessonProgress;

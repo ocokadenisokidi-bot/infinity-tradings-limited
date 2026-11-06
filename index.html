@@ -115,8 +115,43 @@
     </article>
   </div>
 
-  <div id="admin-student-list">
-    Loading student applications...
+  
+<div id="admin-student-list">
+  Loading student applications...
+</div>
+
+<hr>
+
+<h3>Course Management</h3>
+<p>Create and manage courses for your students.</p>
+
+<form id="course-form">
+  <label for="course-title">Course title</label>
+  <input id="course-title" type="text" required>
+
+  <label for="course-description">Course description</label>
+  <textarea id="course-description" required></textarea>
+
+  <label for="course-price">Course price</label>
+  <input id="course-price" type="number" min="0" step="0.01" required>
+
+  <label for="course-level">Course level</label>
+  <select id="course-level" required>
+    <option value="Beginner">Beginner</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+  </select>
+
+  <button type="submit">Create Course</button>
+</form>
+
+<p id="course-message"></p>
+
+<div id="admin-course-list">
+  Loading courses...
+</div>
+</section>
+
   </div>
 </section>
  </main>

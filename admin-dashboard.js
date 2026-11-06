@@ -6,7 +6,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const dashboard = document.querySelector("#admin-dashboard");
 const studentList = document.querySelector("#admin-student-list");
-
+const courseForm = document.querySelector("#course-form");
+const courseList = document.querySelector("#admin-course-list");
+const courseMessage = document.querySelector("#course-message");
 async function loadAdminDashboard() {
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -98,6 +100,106 @@ async function updateStudent(userId, status) {
   alert("Student status updated successfully.");
   await loadAdminDashboard();
 }
+async function loadCourses() {
+  const { data: courses, error } = await supabase
+    .from("courses")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    courseList.textContent = "Unable to load courses: " + error.message;
+    return;
+  }
+
+  courseList.replaceChildren();
+
+  if (!courses.length) {
+    courseList.textContent = "No courses created yet.";
+    return;
+  }
+
+  courses.forEach((course) => {
+    const card = document.createElement("article");
+    card.className = "service-card";
+
+    const heading = document.createElement("h3");
+    heading.textContent = course.title;
+
+    const description = document.createElement("p");
+    description.textContent = course.description || "";
+
+    const price = document.createElement("p");
+    price.textContent = "Price: " + course.price;
+
+    const level = document.createElement("p");
+    level.textContent = "Level: " + course.level;
+
+    const status = document.createElement("p");
+    status.textContent = course.is_published
+      ? "Published"
+      : "Draft";
+
+    const publishButton = document.createElement("button");
+    publishButton.type = "button";
+    publishButton.textContent = course.is_published
+      ? "Unpublish"
+      : "Publish";
+
+    publishButton.addEventListener("click", async () => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ is_published: !course.is_published })
+        .eq("id", course.id);
+
+      if (error) {
+        alert("Update failed: " + error.message);
+        return;
+      }
+
+      await loadCourses();
+    });
+
+    card.append(
+      heading,
+      description,
+      price,
+      level,
+      status,
+      publishButton
+    );
+
+    courseList.appendChild(card);
+  });
+}
+
+courseForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  courseMessage.textContent = "Saving course...";
+
+  const newCourse = {
+    title: document.querySelector("#course-title").value.trim(),
+    description: document.querySelector("#course-description").value.trim(),
+    price: Number(document.querySelector("#course-price").value),
+    level: document.querySelector("#course-level").value,
+    is_published: false
+  };
+
+  const { error } = await supabase
+    .from("courses")
+    .insert([newCourse]);
+
+  if (error) {
+    courseMessage.textContent = "Error: " + error.message;
+    return;
+  }
+
+  courseForm.reset();
+  courseMessage.textContent = "Course created successfully!";
+
+  await loadCourses();
+});
+
 
 supabase.auth.onAuthStateChange(() => {
   loadAdminDashboard();

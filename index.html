@@ -73,12 +73,29 @@
 
     <section class="portal-section" id="student-portal">
       <div class="portal-copy"><p class="eyebrow">STUDENT LEARNING SPACE</p><h2>Continue your<br><em>learning journey.</em></h2><p>The student portal will provide registered learners with access to course materials, announcements and learning progress.</p><ul><li>Course materials and lessons</li><li>Student announcements</li><li>Learning progress and resources</li></ul></div>
-      <div class="portal-panel"><div class="portal-lock">⌑</div><h3>Student Portal</h3><p>Student accounts are being prepared. Secure sign-in will be enabled when the portal backend is connected.</p><a class="button button-outline" href="https://wa.me/256775879193?text=Hello%2C%20I%20would%20like%20information%20about%20student%20registration." target="_blank" rel="noopener">Enquire about registration</a><small>Secure student login coming soon</small></div>
+      <div class="portal-panel">
+        <div class="portal-lock">⌑</div>
+        <h3 id="auth-title">Student sign in</h3>
+        <form id="student-auth-form" class="student-auth-form">
+          <label id="student-name-field" hidden>Full name<input id="student-name" type="text" autocomplete="name" placeholder="Your full name"></label>
+          <label>Email address<input id="student-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+          <label>Password<input id="student-password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required></label>
+          <button class="button button-gold auth-submit" id="auth-submit" type="submit">Sign in</button>
+        </form>
+        <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+        <button class="auth-switch" id="auth-switch" type="button">New student? Create an account</button>
+        <div id="student-signed-in" class="student-signed-in" hidden>
+          <p>You are signed in as <strong id="student-email-display"></strong>.</p>
+          <p>Your student learning space is being prepared.</p>
+          <button class="button button-outline" id="student-signout" type="button">Sign out</button>
+        </div>
+        <small>Use the email address you registered with. Email confirmation may be required.</small>
+      </div>
     </section>
 
     <section class="contact-section" id="contact"><p class="eyebrow">LET'S CONNECT</p><h2>Take the next step.</h2><p>Contact our team for information about our learning programmes and services.</p><div class="contact-links"><a href="https://wa.me/256775879193" target="_blank" rel="noopener">WhatsApp: +256 775 879 193</a><a href="mailto:ocokadenis@gmail.com">ocokadenis@gmail.com</a></div></section>
   </main>
   <footer><a class="brand footer-brand" href="#home"><span class="brand-mark">∞</span><span><strong>INFINITY</strong><small>TRADINGS LIMITED</small></span></a><p>© <span id="year"></span> INFINITY TRADINGS LIMITED. All rights reserved.</p><a href="#home">Back to top ↑</a></footer>
-  <script src="script.js"></script>
+  <script src="script.js"></script>\n  <script type="module" src="student-portal.js"></script>
 </body>
 </html>
